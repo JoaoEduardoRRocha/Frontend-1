@@ -1,13 +1,10 @@
 import './MainPage.css'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   mockProducts,
   collections,
-  lookbook,
   testimonials,
-  stats,
-  announcements,
   filterCategories,
   filterSizes,
   filterColors,
@@ -27,40 +24,44 @@ const colorHex = (name: string) => {
   return found?.hex ?? '#cfc3b1'
 }
 
+const VISIT_KEY = 'dora_visitas'
+
 export default function MainPage() {
   const navigate = useNavigate()
 
   const [activeCategory, setActiveCategory] = useState<string>('Todos')
   const [selectedSizes, setSelectedSizes] = useState<string[]>([])
   const [selectedColors, setSelectedColors] = useState<string[]>([])
-  const [priceMax, setPriceMax] = useState<number>(160)
   const [search, setSearch] = useState<string>('')
   const [sort, setSort] = useState<string>('recent')
-  const [filtersOpen, setFiltersOpen] = useState<boolean>(true)
 
-  const gridRef = useRef<HTMLDivElement>(null)
+  const [visitas, setVisitas] = useState<number>(2147)
 
-  const maxPriceCap = useMemo(
-    () => Math.max(...mockProducts.map((p) => parseFloat(p.price))),
-    [],
-  )
+  // contador de visitas (localStorage, com base "fofa")
+  useEffect(() => {
+    try {
+      const cur = parseInt(localStorage.getItem(VISIT_KEY) || '2147', 10)
+      const next = isNaN(cur) ? 2148 : cur + 1
+      localStorage.setItem(VISIT_KEY, String(next))
+      setVisitas(next)
+    } catch {
+      setVisitas(2148)
+    }
+  }, [])
 
   const filtered = useMemo<Item[]>(() => {
     let list = [...mockProducts]
     if (activeCategory !== 'Todos') list = list.filter((p) => p.category === activeCategory)
     if (selectedSizes.length > 0) list = list.filter((p) => selectedSizes.includes(p.size))
-    if (selectedColors.length > 0)
-      list = list.filter((p) => selectedColors.includes(p.color))
+    if (selectedColors.length > 0) list = list.filter((p) => selectedColors.includes(p.color))
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
-          p.brand.toLowerCase().includes(q) ||
           p.category.toLowerCase().includes(q),
       )
     }
-    list = list.filter((p) => parseFloat(p.price) <= priceMax)
 
     switch (sort) {
       case 'price-asc':
@@ -79,7 +80,7 @@ export default function MainPage() {
         )
     }
     return list
-  }, [activeCategory, selectedSizes, selectedColors, priceMax, search, sort])
+  }, [activeCategory, selectedSizes, selectedColors, search, sort])
 
   const toggleSize = (s: string) =>
     setSelectedSizes((prev) =>
@@ -93,585 +94,315 @@ export default function MainPage() {
     setActiveCategory('Todos')
     setSelectedSizes([])
     setSelectedColors([])
-    setPriceMax(Math.ceil(maxPriceCap))
     setSearch('')
     setSort('recent')
   }
 
-  // Reveal-on-scroll
-  useEffect(() => {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add('is-revealed')
-            io.unobserve(e.target)
-          }
-        })
-      },
-      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' },
-    )
-    document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el))
-    return () => io.disconnect()
-  }, [filtered])
-
-  const handleWhatsApp = (item: Item) => {
-    const itemUrl = `${window.location.origin}/item/${item.id}`
+  const handleWhatsApp = (item?: Item) => {
+    const itemUrl = item ? `${window.location.origin}/item/${item.id}` : ''
     const message = encodeURIComponent(
-      `Olá Dora, tenho interesse na peça "${item.name}".\n\n${itemUrl}`,
+      item
+        ? `Olá Dora! Tenho interesse na peça "${item.name}". ${itemUrl}`
+        : 'Olá Dora! Vi seu site e gostaria de saber mais.',
     )
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank')
   }
 
   return (
-    <div className="dora">
-      {/* TICKER */}
-      <div className="dora-ticker" aria-hidden="true">
-        <div className="dora-ticker__track">
-          {[...announcements, ...announcements].map((a, i) => (
-            <span key={i} className="dora-ticker__item">
-              <span className="dora-ticker__dot">✦</span>
-              {a}
-            </span>
-          ))}
+    <div className="biz">
+      {/* Cabeçalho */}
+      <header className="biz-header">
+        <div className="biz-header__top">
+          <div className="biz-header__brand">
+            <span className="biz-header__star">✿</span>
+            <h1 className="biz-header__name">Dora Modas</h1>
+            <span className="biz-header__star">✿</span>
+          </div>
+          <p className="biz-header__slogan">
+            <i>~ Roupas femininas com carinho desde 2018 ~</i>
+          </p>
+          <p className="biz-header__addr">
+            Rua Salgueiro do Campo, 505 · São Paulo/SP · CEP 05814-210 · Tel: (11) 91685-0647
+          </p>
         </div>
-      </div>
 
-      {/* NAV */}
-      <header className="dora-nav">
-        <div className="dora-nav__inner">
-          <div className="dora-nav__left">
-            <a href="#colecoes" className="dora-nav__link">Coleções</a>
-            <a href="#curadoria" className="dora-nav__link">Curadoria</a>
-            <a href="#lookbook" className="dora-nav__link">Lookbook</a>
-            <a href="#atelier" className="dora-nav__link">Atelier</a>
-          </div>
-          <a href="#" className="dora-nav__brand">
-            Dora
-            <span className="dora-nav__brand-amp">&amp;</span>
-            Modas
+        <nav className="biz-nav">
+          <a href="#promocoes">Promoções</a>
+          <span>|</span>
+          <a href="#produtos">Nossa loja</a>
+          <span>|</span>
+          <a href="#sobre">Sobre a Dora</a>
+          <span>|</span>
+          <a href="#contato">Como chegar</a>
+          <span>|</span>
+          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/login') }}>
+            Entrar
           </a>
-          <div className="dora-nav__right">
-            <button className="dora-nav__icon" aria-label="Buscar">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.5-3.5" strokeLinecap="round" />
-              </svg>
-            </button>
-            <button className="dora-nav__icon" aria-label="Conta" onClick={() => navigate('/login')}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4">
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6" strokeLinecap="round" />
-              </svg>
-            </button>
-            <button className="dora-nav__bag" aria-label="Sacola">
-              Sacola <span className="dora-nav__bag-count">02</span>
-            </button>
-          </div>
-        </div>
+        </nav>
       </header>
 
-      {/* HERO */}
-      <section className="dora-hero">
-        <div className="dora-hero__grid">
-          <div className="dora-hero__copy" data-reveal>
-            <span className="dora-eyebrow">
-              <span className="dora-eyebrow__bar" /> Coleção 04 / 2026
-            </span>
-            <h1 className="dora-hero__title">
-              Peças que
-              <br />
-              <em>respiram</em> com
-              <br />
-              quem as veste.
-            </h1>
-            <p className="dora-hero__lede">
-              Costuradas devagar. Tecidos vivos, modelagem precisa,
-              cuidado vitalício. Um atelier brasileiro construindo um guarda-roupa
-              que dura décadas — não temporadas.
-            </p>
-            <div className="dora-hero__cta">
-              <a href="#grade" className="dora-btn dora-btn--filled">
-                Explorar a coleção
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </a>
-              <a href="#atelier" className="dora-btn dora-btn--ghost">
-                Conhecer o atelier
-              </a>
-            </div>
-
-            <dl className="dora-hero__meta">
-              <div>
-                <dt>Atelier</dt>
-                <dd>São Paulo, BR</dd>
-              </div>
-              <div>
-                <dt>Lançamento</dt>
-                <dd>Maio · 2026</dd>
-              </div>
-              <div>
-                <dt>Edição</dt>
-                <dd>Limitada · 187 peças</dd>
-              </div>
-            </dl>
-          </div>
-
-          <div className="dora-hero__visual" data-reveal>
-            <div className="dora-hero__photo dora-hero__photo--main">
-              <img
-                src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=900&q=80"
-                alt="Modelo vestindo peça da coleção"
-              />
-              <span className="dora-hero__tag">Look 03 — Ocre & Linho</span>
-            </div>
-            <div className="dora-hero__photo dora-hero__photo--inset">
-              <img
-                src="https://images.unsplash.com/photo-1485518882345-15568b007407?w=600&q=80"
-                alt="Detalhe têxtil"
-              />
-            </div>
-            <div className="dora-hero__chip">
-              <span className="dora-hero__chip-num">04</span>
-              <span className="dora-hero__chip-text">
-                Coleções
-                <br />
-                por ano
-              </span>
-            </div>
-          </div>
+      {/* Boas-vindas */}
+      <section className="biz-bemvinda">
+        <div className="biz-box biz-box--rosa">
+          <h2 className="biz-box__title blink">★ Bem-vinda à nossa lojinha! ★</h2>
+          <p>
+            Oi, querida! Eu sou a <b>Dora</b> e essa aqui é a minha lojinha de roupas.
+            Tô há 8 anos atendendo as mulheres do bairro e agora também pela <b>internet</b>!
+            Dá uma olhadinha nas peças, escolhe o que gostar e me chama no <b>Whatsapp</b>.
+            Eu mesma respondo!
+          </p>
+          <p style={{ marginTop: '0.8rem' }}>
+            <button className="biz-btn biz-btn--zap" onClick={() => handleWhatsApp()}>
+              💬 Chamar a Dora no Whats
+            </button>
+          </p>
         </div>
       </section>
 
-      {/* PROMISES */}
-      <section className="dora-promises">
-        <div className="dora-promises__row">
-          {[
-            { k: 'I', t: 'Costura à mão', s: 'Cada peça finalizada por uma artesã' },
-            { k: 'II', t: 'Tecidos naturais', s: 'Linho, seda, alpaca, algodão pima' },
-            { k: 'III', t: 'Ajustes vitalícios', s: 'Reparos e modificações para sempre' },
-            { k: 'IV', t: 'Edição limitada', s: 'Sem reposições; sem desperdício' },
-          ].map((p) => (
-            <div key={p.k} className="dora-promises__cell" data-reveal>
-              <span className="dora-promises__num">{p.k}</span>
-              <span className="dora-promises__title">{p.t}</span>
-              <span className="dora-promises__sub">{p.s}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CURADORIA / COLLECTIONS */}
-      <section id="curadoria" className="dora-curadoria">
-        <div className="dora-section-head">
-          <span className="dora-section-head__label">§ 01 — Curadoria</span>
-          <h2 className="dora-section-head__title">
-            Três coleções <em>vivas</em>,
-            <br />
-            costuradas neste momento.
-          </h2>
-        </div>
-
-        <div className="dora-curadoria__grid">
-          {collections.map((c, idx) => (
-            <article
-              key={c.id}
-              className={`dora-collection dora-collection--${idx}`}
-              data-reveal
-            >
-              <div className="dora-collection__image">
+      {/* Promoções da semana */}
+      <section id="promocoes" className="biz-section">
+        <h2 className="biz-h2">★ Promoções da Semana ★</h2>
+        <hr className="biz-hr" />
+        <div className="biz-promos">
+          {collections.map((c) => (
+            <article key={c.id} className="biz-promo">
+              <div className="biz-promo__img">
                 <img src={c.image} alt={c.title} />
-                <span className="dora-collection__pieces">{c.pieces} peças</span>
               </div>
-              <div className="dora-collection__body">
-                <span className="dora-collection__sub">{c.subtitle}</span>
-                <h3 className="dora-collection__title">{c.title}</h3>
-                <p className="dora-collection__desc">{c.description}</p>
-                <a href="#grade" className="dora-link">
-                  Ver peças <span aria-hidden>→</span>
-                </a>
-              </div>
+              <h3 className="biz-promo__title">{c.title}</h3>
+              <p className="biz-promo__sub">{c.subtitle}</p>
+              <p className="biz-promo__desc">{c.description}</p>
+              <a href="#produtos" className="biz-link">» Ver na loja</a>
             </article>
           ))}
         </div>
       </section>
 
-      {/* GRID + FILTERS */}
-      <section id="grade" className="dora-grade">
-        <div className="dora-section-head dora-section-head--with-controls">
-          <div>
-            <span className="dora-section-head__label">§ 02 — Vitrine</span>
-            <h2 className="dora-section-head__title">
-              {filtered.length}
-              <span className="dora-section-head__title-sub">
-                {' '}
-                {filtered.length === 1 ? 'peça' : 'peças'} disponíveis
-              </span>
-            </h2>
-          </div>
+      {/* Catálogo */}
+      <section id="produtos" className="biz-section">
+        <h2 className="biz-h2">✿ Nossa Loja — {filtered.length} {filtered.length === 1 ? 'peça' : 'peças'} ✿</h2>
+        <hr className="biz-hr" />
 
-          <div className="dora-controls">
-            <div className="dora-search">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.5-3.5" strokeLinecap="round" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Buscar por peça, marca ou categoria"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              {search && (
-                <button onClick={() => setSearch('')} className="dora-search__clear" aria-label="Limpar">
-                  ×
-                </button>
-              )}
-            </div>
-
-            <div className="dora-sort">
-              <label>Ordenar</label>
-              <select value={sort} onChange={(e) => setSort(e.target.value)}>
-                {sortOptions.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              className="dora-filter-toggle"
-              onClick={() => setFiltersOpen((s) => !s)}
-              aria-expanded={filtersOpen}
-            >
-              Filtros
-              <span className={`dora-filter-toggle__chev ${filtersOpen ? 'is-open' : ''}`}>↓</span>
-            </button>
-          </div>
+        {/* Busca + ordenar */}
+        <div className="biz-toolbar">
+          <label>
+            <b>Buscar:</b>{' '}
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="ex: vestido"
+              className="biz-input"
+            />
+          </label>
+          <label>
+            <b>Ordenar por:</b>{' '}
+            <select value={sort} onChange={(e) => setSort(e.target.value)} className="biz-select">
+              {sortOptions.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </label>
+          <button className="biz-btn biz-btn--limpar" onClick={resetFilters}>
+            Limpar filtros
+          </button>
         </div>
 
-        {filtersOpen && (
-          <div className="dora-filters" data-reveal>
-            {/* Categories */}
-            <div className="dora-filter">
-              <span className="dora-filter__label">Categoria</span>
-              <div className="dora-chips">
+        {/* Filtros estilo "tabela do site antigo" */}
+        <table className="biz-filters">
+          <tbody>
+            <tr>
+              <td className="biz-filters__label">Categoria:</td>
+              <td>
                 {filterCategories.map((cat) => (
                   <button
                     key={cat}
-                    className={`dora-chip ${activeCategory === cat ? 'is-active' : ''}`}
+                    className={`biz-tag ${activeCategory === cat ? 'is-on' : ''}`}
                     onClick={() => setActiveCategory(cat)}
                   >
                     {cat}
                   </button>
                 ))}
-              </div>
-            </div>
-
-            {/* Sizes */}
-            <div className="dora-filter">
-              <span className="dora-filter__label">Tamanho</span>
-              <div className="dora-chips">
+              </td>
+            </tr>
+            <tr>
+              <td className="biz-filters__label">Tamanho:</td>
+              <td>
                 {filterSizes.map((s) => (
                   <button
                     key={s}
-                    className={`dora-chip dora-chip--square ${
-                      selectedSizes.includes(s) ? 'is-active' : ''
-                    }`}
+                    className={`biz-tag biz-tag--sq ${selectedSizes.includes(s) ? 'is-on' : ''}`}
                     onClick={() => toggleSize(s)}
                   >
                     {s}
                   </button>
                 ))}
-              </div>
-            </div>
-
-            {/* Colors */}
-            <div className="dora-filter">
-              <span className="dora-filter__label">Cor</span>
-              <div className="dora-color-row">
+              </td>
+            </tr>
+            <tr>
+              <td className="biz-filters__label">Cor:</td>
+              <td>
                 {filterColors.map((c) => (
                   <button
                     key={c.name}
-                    className={`dora-color ${selectedColors.includes(c.name) ? 'is-active' : ''}`}
+                    className={`biz-tag ${selectedColors.includes(c.name) ? 'is-on' : ''}`}
                     onClick={() => toggleColor(c.name)}
                     title={c.name}
                   >
-                    <span className="dora-color__swatch" style={{ background: c.hex }} />
-                    <span className="dora-color__name">{c.name}</span>
+                    <span
+                      className="biz-color-dot"
+                      style={{ background: c.hex }}
+                    />
+                    {c.name}
                   </button>
                 ))}
-              </div>
-            </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-            {/* Price slider */}
-            <div className="dora-filter dora-filter--range">
-              <div className="dora-filter__row">
-                <span className="dora-filter__label">Preço até</span>
-                <span className="dora-filter__value">R$ {formatPrice(priceMax)}</span>
-              </div>
-              <input
-                type="range"
-                min={80}
-                max={Math.ceil(maxPriceCap)}
-                step={1}
-                value={priceMax}
-                onChange={(e) => setPriceMax(parseInt(e.target.value))}
-                className="dora-range"
-              />
-              <div className="dora-range__rail">
-                <span>R$ 80</span>
-                <span>R$ {formatPrice(Math.ceil(maxPriceCap))}</span>
-              </div>
-            </div>
-
-            <div className="dora-filters__actions">
-              <button className="dora-link dora-link--inline" onClick={resetFilters}>
-                Limpar tudo
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Active filter pills */}
-        {(activeCategory !== 'Todos' || selectedSizes.length > 0 || selectedColors.length > 0) && (
-          <div className="dora-active-filters">
-            {activeCategory !== 'Todos' && (
-              <span className="dora-pill">
-                {activeCategory}
-                <button onClick={() => setActiveCategory('Todos')}>×</button>
-              </span>
-            )}
-            {selectedSizes.map((s) => (
-              <span key={s} className="dora-pill">
-                Tam · {s}
-                <button onClick={() => toggleSize(s)}>×</button>
-              </span>
-            ))}
-            {selectedColors.map((c) => (
-              <span key={c} className="dora-pill">
-                <span className="dora-pill__dot" style={{ background: colorHex(c) }} />
-                {c}
-                <button onClick={() => toggleColor(c)}>×</button>
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Editorial product grid */}
-        <div className="dora-products" ref={gridRef}>
+        {/* Grade de produtos */}
+        <div className="biz-products">
           {filtered.length === 0 && (
-            <div className="dora-empty">
-              <h3>Nenhuma peça neste recorte.</h3>
-              <p>Tente ampliar os filtros ou olhar outra coleção.</p>
-              <button className="dora-btn dora-btn--ghost" onClick={resetFilters}>
-                Limpar filtros
-              </button>
+            <div className="biz-empty">
+              <p>:( <b>Não achei nenhuma peça com esses filtros.</b></p>
+              <p>Tenta limpar os filtros e olhar de novo!</p>
+              <button className="biz-btn" onClick={resetFilters}>Limpar filtros</button>
             </div>
           )}
-          {filtered.map((item, idx) => (
+
+          {filtered.map((item) => (
             <article
               key={item.id}
-              className={`dora-card ${idx % 7 === 0 ? 'dora-card--feature' : ''}`}
-              data-reveal
+              className="biz-card"
               onClick={() => navigate(`/item/${item.id}`)}
             >
-              <div className="dora-card__image">
+              <div className="biz-card__img">
                 <img src={item.imageUrl} alt={item.name} loading="lazy" />
-                <button
-                  className="dora-card__quick"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleWhatsApp(item)
-                  }}
-                >
-                  Conversar sobre essa peça
-                </button>
                 {item.quantity <= 4 && (
-                  <span className="dora-card__badge">Últimas {item.quantity}</span>
+                  <span className="biz-card__badge">Só {item.quantity}!</span>
                 )}
               </div>
-              <div className="dora-card__body">
-                <div className="dora-card__brand">
-                  <span>{item.brand}</span>
-                  <span className="dora-card__cat">{item.category}</span>
-                </div>
-                <h3 className="dora-card__name">{item.name}</h3>
-                <div className="dora-card__foot">
-                  <span className="dora-card__price">R$ {formatPrice(item.price)}</span>
-                  <span className="dora-card__color">
-                    <span className="dora-card__dot" style={{ background: colorHex(item.color) }} />
-                    {item.color} · {item.size}
-                  </span>
-                </div>
-              </div>
+              <h3 className="biz-card__name">{item.name}</h3>
+              <p className="biz-card__meta">
+                Tam <b>{item.size}</b> ·{' '}
+                <span className="biz-card__cor">
+                  <span className="biz-color-dot" style={{ background: colorHex(item.color) }} />
+                  {item.color}
+                </span>
+              </p>
+              <p className="biz-card__price">
+                <small>R$</small> {formatPrice(item.price)}
+              </p>
+              <button
+                className="biz-btn biz-btn--zap biz-btn--small"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleWhatsApp(item)
+                }}
+              >
+                💬 Quero essa!
+              </button>
             </article>
           ))}
         </div>
       </section>
 
-      {/* LOOKBOOK */}
-      <section id="lookbook" className="dora-lookbook">
-        <div className="dora-lookbook__head" data-reveal>
-          <span className="dora-section-head__label">§ 03 — Lookbook</span>
-          <h2 className="dora-section-head__title">
-            Três <em>looks</em>, três
-            <br />
-            maneiras de habitar
-            <br />
-            esta estação.
-          </h2>
+      {/* Sobre a Dora + recados */}
+      <section id="sobre" className="biz-section biz-section--cols">
+        <div className="biz-box biz-box--amarelo">
+          <h2 className="biz-h2 biz-h2--small">Quem é a Dora?</h2>
+          <hr className="biz-hr" />
+          <p>
+            Meu nome é <b>Dora Modas</b> e eu abri minha lojinha em 2018, depois de
+            muitos anos costurando em casa pra família e amigas. Hoje atendo no
+            balcão da loja, pelo Whatsapp e agora pela <i>internet</i> 😊.
+          </p>
+          <p style={{ marginTop: '0.8rem' }}>
+            Aqui você encontra peça por preço justo, com troca garantida em 7 dias e
+            <b> aquele atendimento de quem te conhece pelo nome</b>.
+          </p>
         </div>
 
-        <div className="dora-lookbook__grid">
-          {lookbook.map((l, i) => (
-            <figure
-              key={l.id}
-              className={`dora-look dora-look--${i}`}
-              data-reveal
-            >
-              <div className="dora-look__frame">
-                <img src={l.image} alt={l.look} loading="lazy" />
-              </div>
-              <figcaption>
-                <span className="dora-look__num">0{l.id}</span>
-                <h4>{l.look}</h4>
-                <ul>
-                  {l.pieces.map((p) => (
-                    <li key={p}>— {p}</li>
-                  ))}
-                </ul>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
-
-      {/* STATS */}
-      <section id="atelier" className="dora-stats">
-        <div className="dora-stats__inner">
-          <div className="dora-stats__copy" data-reveal>
-            <span className="dora-section-head__label dora-section-head__label--light">
-              § 04 — O Atelier
-            </span>
-            <h2 className="dora-stats__title">
-              Em <em>números</em>,
-              <br />
-              uma costura
-              <br />
-              do tempo.
-            </h2>
-            <p className="dora-stats__lede">
-              Trabalhamos com 14 cooperativas e ateliês independentes em
-              Minas, Cusco, e na Sé paulistana. Toda peça vem com etiqueta
-              gravada à mão e a assinatura da artesã que a finalizou.
-            </p>
-          </div>
-
-          <div className="dora-stats__grid" data-reveal>
-            {stats.map((s, i) => (
-              <div key={i} className="dora-stat">
-                <span className="dora-stat__value">{s.value}</span>
-                <span className="dora-stat__label">{s.label}</span>
-              </div>
+        <div className="biz-box biz-box--azul">
+          <h2 className="biz-h2 biz-h2--small">★ O que dizem ★</h2>
+          <hr className="biz-hr" />
+          <ul className="biz-quotes">
+            {testimonials.map((t) => (
+              <li key={t.id}>
+                <p>"{t.quote}"</p>
+                <small>— {t.name}, <i>{t.role}</i></small>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="dora-quotes">
-        <div className="dora-quotes__head" data-reveal>
-          <span className="dora-section-head__label">§ 05 — Em palavras</span>
-        </div>
-        <div className="dora-quotes__grid">
-          {testimonials.map((t) => (
-            <blockquote key={t.id} className="dora-quote" data-reveal>
-              <span className="dora-quote__mark">&ldquo;</span>
-              <p>{t.quote}</p>
-              <footer>
-                <strong>{t.name}</strong>
-                <span>{t.role}</span>
-              </footer>
-            </blockquote>
-          ))}
-        </div>
+      {/* Contato */}
+      <section id="contato" className="biz-section">
+        <h2 className="biz-h2">✉ Como chegar / Fale conosco ✉</h2>
+        <hr className="biz-hr" />
+        <table className="biz-contact" cellPadding={6}>
+          <tbody>
+            <tr>
+              <th>Endereço:</th>
+              <td>Rua Salgueiro do Campo, 505 — São Paulo/SP — CEP 05814-210</td>
+            </tr>
+            <tr>
+              <th>Telefone:</th>
+              <td>(11) 3456-7890</td>
+            </tr>
+            <tr>
+              <th>WhatsApp:</th>
+              <td>
+                (11) 91685-0647 ·{' '}
+                <a
+                  href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Chamar agora »
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <th>E-mail:</th>
+              <td>
+                <a href="mailto:dora@doraemodas.com.br">dora@doraemodas.com.br</a>
+              </td>
+            </tr>
+            <tr>
+              <th>Horário:</th>
+              <td>
+                Seg a Sex das 9h às 18h · Sábado das 9h às 13h ·{' '}
+                <i>Domingo fechado</i>
+              </td>
+            </tr>
+            <tr>
+              <th>Pagamento:</th>
+              <td>
+                ✓ Pix &nbsp; ✓ Cartão de débito &nbsp; ✓ Cartão de crédito
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </section>
 
-      {/* NEWSLETTER */}
-      <section className="dora-news">
-        <div className="dora-news__inner" data-reveal>
-          <div className="dora-news__copy">
-            <span className="dora-section-head__label dora-section-head__label--light">
-              § 06 — Diário
-            </span>
-            <h2 className="dora-news__title">
-              Receba o <em>diário</em> do
-              <br />
-              atelier no e-mail.
-            </h2>
-            <p>
-              Uma carta mensal sobre tecidos, colaborações e o que está
-              sendo costurado agora. Sem promoções, sem ruído.
-            </p>
-          </div>
-          <form
-            className="dora-news__form"
-            onSubmit={(e) => {
-              e.preventDefault()
-              const input = (e.target as HTMLFormElement).elements.namedItem('email') as HTMLInputElement
-              alert(`Obrigada — adicionamos ${input.value} ao diário.`)
-              input.value = ''
-            }}
-          >
-            <input type="email" name="email" required placeholder="seu@endereço" />
-            <button type="submit">
-              Assinar
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </form>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="dora-footer">
-        <div className="dora-footer__inner">
-          <div className="dora-footer__brand">
-            <h3>Dora&amp;Modas</h3>
-            <p>Atelier de coleção · São Paulo · est. 2018</p>
-          </div>
-          <div className="dora-footer__cols">
-            <div>
-              <h5>Coleções</h5>
-              <a>Primavera Lenta</a>
-              <a>Estúdio Noir</a>
-              <a>Andina</a>
-              <a>Arquivo</a>
-            </div>
-            <div>
-              <h5>Atelier</h5>
-              <a>Nossa história</a>
-              <a>Materiais</a>
-              <a>Cooperativas</a>
-              <a>Sustentabilidade</a>
-            </div>
-            <div>
-              <h5>Cuidados</h5>
-              <a>Programa de ajustes</a>
-              <a>Trocas e devoluções</a>
-              <a>Lavagem</a>
-              <a>Contato</a>
-            </div>
-          </div>
-        </div>
-        <div className="dora-footer__bottom">
-          <span>© 2026 Dora&amp;Modas — Costurado em São Paulo</span>
-          <span>BR · PT</span>
-        </div>
+      {/* Rodapé */}
+      <footer className="biz-footer">
+        <p>
+          © 2026 — <b>Dora Modas</b> — Todos os direitos reservados.
+        </p>
+        <p className="biz-footer__line">
+          Última atualização: <b>03/05/2026</b> · Você é a visita nº{' '}
+          <span className="biz-counter">{String(visitas).padStart(6, '0')}</span>
+        </p>
+        <p className="biz-footer__small">
+          <i>Site feito com carinho 💖 — melhor visualizado em 1024x768</i>
+        </p>
+        <p className="biz-footer__small">
+          <a href="#">Topo da página ↑</a>
+        </p>
       </footer>
     </div>
   )

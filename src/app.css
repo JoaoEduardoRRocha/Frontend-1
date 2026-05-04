@@ -1,34 +1,44 @@
 :root {
   font-size: 62.5%;
 
-  /* Dora Modas — Editorial Palette */
-  --bone: #F2EDE4;
-  --bone-deep: #E8E0D2;
-  --bone-soft: #F8F4EC;
-  --ink: #1A1714;
-  --ink-soft: #3A322A;
-  --ink-mute: #6B5D4D;
-  --ink-faint: #9B8A77;
-  --rule: #DCD2C0;
-  --sienna: #B23A1F;
-  --sienna-deep: #8E2C16;
-  --sage: #9CA889;
-  --rose: #D8B5A8;
+  /* DoraModas — paleta tirada do post da loja (peach + rosé suave) */
+  --pessego: #fbe6dc;
+  --pessego-claro: #fdf3ec;
+  --rosa-claro: #f7d2c4;
+  --rosa: #ecb4a4;
+  --rosa-forte: #b94e6b;
+  --rosa-escuro: #7e3145;
+  --carmim: var(--rosa-forte);
+  --carmim-escuro: var(--rosa-escuro);
+  --azul-link: #8a3454;
+  --roxo-visitado: #6c2742;
+  --amarelo: #fff5a8;
+  --amarelo-forte: #ffeb3b;
+  --creme: #fbe6dc;
+  --bege: #f3e3d4;
+  --vermelho: var(--rosa-escuro);
+  --verde: #2e8b57;
+  --cinza: #d8c6bc;
+  --cinza-claro: #f3e7df;
+  --cinza-escuro: #6b504b;
+  --preto: #2a1a1f;
+  /* alias antigo */
+  --azul: var(--rosa-forte);
 
-  /* Legacy tokens kept so as not to break other pages */
-  --primary-color: var(--sienna);
-  --secondary-color: var(--rose);
-  --accent-color: var(--sienna-deep);
-  --light-pink: var(--bone-soft);
-  --text-dark: var(--ink);
-  --text-light: #FFFFFF;
-  --background-light: var(--bone-soft);
-  --background-dark: var(--ink);
+  /* Legados (caso outras páginas ainda usem) */
+  --primary-color: var(--rosa-forte);
+  --secondary-color: var(--rosa);
+  --accent-color: var(--azul);
+  --light-pink: var(--rosa-claro);
+  --text-dark: var(--preto);
+  --text-light: #ffffff;
+  --background-light: var(--creme);
+  --background-dark: var(--azul);
 
-  --font-display: 'Fraunces', 'Instrument Serif', Georgia, serif;
-  --font-display-italic: 'Instrument Serif', 'Fraunces', Georgia, serif;
-  --font-body: 'Manrope', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-titulo: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+  --font-corpo: Verdana, Geneva, Tahoma, Arial, sans-serif;
+  --font-serif: 'Times New Roman', Times, serif;
+  --font-mono: 'Courier New', Courier, monospace;
 }
 
 * {
@@ -42,57 +52,59 @@ html, body {
   padding: 0;
   min-height: 100vh;
   width: 100%;
-  overflow-x: hidden;
 }
 
 body {
-  font-family: var(--font-body);
-  background: var(--bone);
-  color: var(--ink);
-  line-height: 1.55;
-  font-size: 1.6rem;
-  font-weight: 400;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  font-family: var(--font-corpo);
+  background: var(--pessego);
+  color: var(--preto);
+  line-height: 1.4;
+  font-size: 1.3rem;
 }
 
-input, textarea, [contenteditable="true"] {
-  cursor: text;
+/* Fundo "papel de parede" tipo site antigo */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(185,78,107,0.08) 0 2px, transparent 3px),
+    radial-gradient(circle at 80% 60%, rgba(126,49,69,0.06) 0 2px, transparent 3px),
+    radial-gradient(circle at 40% 90%, rgba(236,180,164,0.18) 0 2px, transparent 3px);
+  background-size: 60px 60px, 80px 80px, 100px 100px;
 }
 
-button, a, [role="button"], .clickable {
-  cursor: pointer;
+input, textarea, select {
+  font-family: var(--font-corpo);
 }
+
+a { color: var(--azul-link); }
+a:visited { color: var(--roxo-visitado); }
+a:hover { color: var(--vermelho); }
+
+button { font-family: inherit; cursor: pointer; }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
-  color: var(--ink);
+  font-family: var(--font-titulo);
+  color: var(--rosa-forte);
+  font-weight: bold;
 }
 
 ::selection {
-  background: var(--ink);
-  color: var(--bone);
+  background: var(--amarelo-forte);
+  color: var(--preto);
 }
 
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--bone);
 }
 
 .container {
-  max-width: 1400px;
+  max-width: 980px;
   margin: 0 auto;
-  padding: 0 4rem;
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 0 2rem;
-  }
+  padding: 0 1.5rem;
 }
