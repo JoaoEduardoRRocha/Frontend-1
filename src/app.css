@@ -1,0 +1,98 @@
+:root {
+  font-size: 62.5%;
+
+  /* Dora Modas — Editorial Palette */
+  --bone: #F2EDE4;
+  --bone-deep: #E8E0D2;
+  --bone-soft: #F8F4EC;
+  --ink: #1A1714;
+  --ink-soft: #3A322A;
+  --ink-mute: #6B5D4D;
+  --ink-faint: #9B8A77;
+  --rule: #DCD2C0;
+  --sienna: #B23A1F;
+  --sienna-deep: #8E2C16;
+  --sage: #9CA889;
+  --rose: #D8B5A8;
+
+  /* Legacy tokens kept so as not to break other pages */
+  --primary-color: var(--sienna);
+  --secondary-color: var(--rose);
+  --accent-color: var(--sienna-deep);
+  --light-pink: var(--bone-soft);
+  --text-dark: var(--ink);
+  --text-light: #FFFFFF;
+  --background-light: var(--bone-soft);
+  --background-dark: var(--ink);
+
+  --font-display: 'Fraunces', 'Instrument Serif', Georgia, serif;
+  --font-display-italic: 'Instrument Serif', 'Fraunces', Georgia, serif;
+  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bone);
+  color: var(--ink);
+  line-height: 1.55;
+  font-size: 1.6rem;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+input, textarea, [contenteditable="true"] {
+  cursor: text;
+}
+
+button, a, [role="button"], .clickable {
+  cursor: pointer;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--bone);
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bone);
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 4rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 2rem;
+  }
+}

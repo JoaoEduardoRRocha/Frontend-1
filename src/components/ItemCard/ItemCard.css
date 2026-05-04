@@ -1,0 +1,406 @@
+/* Item Card Wrapper */
+.item-card-wrapper {
+  display: block;
+}
+
+/* Item Cards */
+.item-card {
+  background: #ffeef5;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08),
+              0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 2px solid transparent;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 0.6s ease-out forwards;
+  cursor: pointer;
+}
+
+/* Animação de entrada para os cards */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scroll reveal initial state */
+.item-card.scroll-reveal {
+  opacity: 0;
+  transform: translateY(50px);
+  animation: none;
+}
+
+.item-card.scroll-reveal.visible {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Efeito de shimmer ao passar o mouse */
+.item-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 140, 66, 0.1), transparent);
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+
+.item-card:hover::before {
+  left: 100%;
+}
+
+/* Item Image */
+.item-image-container {
+  width: 100%;
+  height: 160px;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.item-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.item-card:hover .item-image {
+  transform: scale(1.05);
+}
+
+/* Image Placeholder */
+.item-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+}
+
+.placeholder-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.5;
+}
+
+.placeholder-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.item-card:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(255, 140, 66, 0.25),
+              0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 2px solid var(--light-pink);
+}
+
+.item-id {
+  background: var(--secondary-color);
+  color: var(--text-dark);
+  padding: 0.3rem 0.8rem;
+  border-radius: 15px;
+  font-size: 1rem; /* Increased from 0.8rem */
+  font-weight: 600;
+}
+
+.item-price {
+  font-size: 1.6rem; /* Increased from 1.4rem */
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.item-name {
+  font-size: 1.5rem; /* Increased from 1.3rem */
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 1rem 0;
+}
+
+.item-details {
+  margin-bottom: 1rem;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  font-size: 1.1rem; /* Increased from 0.9rem */
+  color: #666;
+  font-weight: 500;
+}
+
+.value {
+  font-size: 1.1rem; /* Increased from 0.9rem */
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+.color-display {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  display: inline-block;
+}
+
+.item-description {
+  color: #666;
+  font-size: 1.1rem; /* Increased from 0.9rem */
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  font-style: italic;
+  /* Truncate to one line with ellipsis */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 2px solid var(--light-pink);
+  gap: 1rem;
+}
+
+.card-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.quantity {
+  background: var(--light-pink);
+  color: var(--text-dark);
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  font-size: 1rem; /* Increased from 0.8rem */
+  font-weight: 600;
+}
+
+.date {
+  font-size: 1rem; /* Increased from 0.8rem */
+  color: #999;
+}
+
+/* WhatsApp Button */
+.whatsapp-button {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.whatsapp-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.whatsapp-button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.whatsapp-button:hover {
+  background: linear-gradient(135deg, #128C7E, #25D366);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+}
+
+.whatsapp-button:active {
+  transform: translateY(0) scale(1);
+}
+
+.whatsapp-icon {
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.whatsapp-text {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Card Actions */
+.card-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.buy-button {
+  width: 100%;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(255, 140, 66, 0.3);
+}
+
+.buy-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.buy-button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+.buy-button:hover {
+  background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(255, 140, 66, 0.4);
+}
+
+.buy-button:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+}
+
+.buy-button:disabled {
+  background: #ccc;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .item-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 12px 30px rgba(255, 140, 66, 0.2),
+                0 4px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  .buy-button:hover {
+    transform: translateY(-2px) scale(1.01);
+  }
+}
+
+@media (max-width: 480px) {
+  .item-card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .item-card:hover {
+    transform: scale(1.01);
+  }
+  
+  .item-name {
+    font-size: 1.3rem;
+  }
+  
+  .item-price {
+    font-size: 1.4rem;
+  }
+  
+  .whatsapp-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  
+  .whatsapp-text {
+    display: none;
+  }
+  
+  .whatsapp-icon {
+    font-size: 1.3rem;
+  }
+  
+  .card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .card-footer-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
