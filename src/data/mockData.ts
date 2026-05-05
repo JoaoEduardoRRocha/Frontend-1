@@ -9,14 +9,14 @@ import image6 from '../assets/image6.jfif'
 export const mockProducts: Item[] = [
   {
     id: 1,
-    name: 'Vestido Florido Verão',
+    name: 'Conjunto Veludo Marrom',
     price: '119.99',
     quantity: 8,
     size: 'M',
-    color: 'Rosa',
+    color: 'Marrom',
     description:
-      'Vestido leve em viscose florida, ótimo para o calor. Tem alça regulável e elástico na cintura. Veste do P ao G.',
-    category: 'Vestidos',
+      'Conjuntinho de jaqueta cropped + calça em veludo cotelê marrom. Cai super bem com bota e vai do trabalho pro happy hour. Veste do P ao G.',
+    category: 'Conjuntos',
     brand: 'Dora',
     imageUrl: image1,
     createdAt: '2026-04-12T10:00:00Z',
@@ -29,7 +29,7 @@ export const mockProducts: Item[] = [
     size: 'P',
     color: 'Branco',
     description:
-      'Blusinha básica em algodão, super versátil. Combina com tudo no armário. Tem do PP ao GG.',
+      'Blusinha básica em algodão, super versátil. Combina com tudo no armário. Disponível em branco e rosa, do PP ao GG.',
     category: 'Blusas',
     brand: 'Dora',
     imageUrl: image2,
@@ -37,13 +37,13 @@ export const mockProducts: Item[] = [
   },
   {
     id: 3,
-    name: 'Blusinha Branca Manga Longa',
+    name: 'Body Marrom Decotado',
     price: '29.99',
     quantity: 12,
     size: 'M',
-    color: 'Branco',
+    color: 'Marrom',
     description:
-      'Blusinha branca de mangas compridas, tecido leve. Ótima pra usar com saia ou jeans.',
+      'Body cavado cor marrom, tecido firminho que modela bem. Ótimo pra usar com saia ou jeans de cintura alta.',
     category: 'Blusas',
     brand: 'Dora',
     imageUrl: image3,
@@ -51,42 +51,42 @@ export const mockProducts: Item[] = [
   },
   {
     id: 4,
-    name: 'Calça Pantalona Areia',
+    name: 'Vestido Coral Verão',
     price: '119.99',
     quantity: 6,
     size: 'G',
-    color: 'Bege',
+    color: 'Coral',
     description:
-      'Calça pantalona, cintura alta, com elástico atrás. Caimento solto e fresquinho.',
-    category: 'Calças',
+      'Vestido fluido cor coral, alcinha fininha, perfeito pra um dia quente. Tecido leve, não amassa fácil.',
+    category: 'Vestidos',
     brand: 'Dora',
     imageUrl: image4,
     createdAt: '2026-03-28T10:00:00Z',
   },
   {
     id: 5,
-    name: 'Tricô Bege Gola Alta',
+    name: 'Vestido Camisa Verde',
     price: '119.99',
     quantity: 5,
     size: 'M',
-    color: 'Bege',
+    color: 'Verde',
     description:
-      'Tricô de gola alta, quentinho, ideal pro friozinho. Lavar à mão!',
-    category: 'Tricôs',
+      'Vestido chemise verde com botões e cintinho na cintura. Elegante e confortável, vai bem em qualquer ocasião.',
+    category: 'Vestidos',
     brand: 'Dora',
     imageUrl: image5,
     createdAt: '2026-04-02T10:00:00Z',
   },
   {
     id: 6,
-    name: 'Sobretudo Camelo',
+    name: 'Vestido Azul Botões',
     price: '129.99',
     quantity: 3,
     size: 'M',
-    color: 'Camelo',
+    color: 'Azul',
     description:
-      'Sobretudo cor camelo com cinto. Esquenta bastante, ótimo pra inverno. Última peça do tamanho!',
-    category: 'Casacos',
+      'Vestido midi azul com botões na frente. Caimento solto e tecido fresquinho. Última peça do tamanho!',
+    category: 'Vestidos',
     brand: 'Dora',
     imageUrl: image6,
     createdAt: '2026-03-15T10:00:00Z',
@@ -100,16 +100,16 @@ export const collections = [
     subtitle: '★ Confira ★',
     description:
       'Vestidos selecionados com até 30% de desconto. Aproveite!',
-    image: image1,
+    image: image5,
     pieces: 24,
   },
   {
-    id: 'inverno',
-    title: 'Coleção Inverno',
+    id: 'meia-estacao',
+    title: 'Coleção Meia Estação',
     subtitle: '★ Acabou de Chegar ★',
     description:
-      'Casacos, tricôs e cardigans pra esquentar você. Roupas quentinhas com preço bom.',
-    image: image6,
+      'Conjuntinhos, vestidos e peças coringa pro friozinho da manhã e o sol da tarde.',
+    image: image1,
     pieces: 8,
   },
   {
@@ -117,7 +117,7 @@ export const collections = [
     title: 'Básicos do Dia a Dia',
     subtitle: '★ Sempre tem ★',
     description:
-      'Camisas, blusinhas e calças que toda mulher precisa ter no armário.',
+      'Bodies, blusinhas e vestidos que toda mulher precisa ter no armário.',
     image: image3,
     pieces: 12,
   },
@@ -148,7 +148,7 @@ export const testimonials = [
   {
     id: 1,
     name: 'Dona Lurdes',
-    role: 'Cliente desde 2018',
+    role: 'Cliente desde 1996',
     quote:
       'Compro aqui faz tempo. A Dora é uma fofa, sempre acha o que serve em mim. Recomendo!',
   },
@@ -169,7 +169,7 @@ export const testimonials = [
 ]
 
 export const stats = [
-  { value: '8 anos', label: 'no bairro' },
+  { value: '30 anos', label: 'no bairro' },
   { value: '+500', label: 'clientes felizes' },
   { value: '100%', label: 'atendimento da Dora' },
   { value: '0', label: 'mistério no preço' },
@@ -186,6 +186,7 @@ export const announcements = [
 export const filterCategories = [
   'Todos',
   'Vestidos',
+  'Conjuntos',
   'Blazer',
   'Blusas',
   'Calças',
@@ -200,7 +201,9 @@ export const filterColors = [
   { name: 'Branco', hex: '#FFFFFF' },
   { name: 'Bege', hex: '#D9C7A7' },
   { name: 'Rosa', hex: '#FFB6C1' },
-  { name: 'Verde', hex: '#9CA889' },
+  { name: 'Coral', hex: '#FF8A70' },
+  { name: 'Verde', hex: '#7FA77A' },
+  { name: 'Azul', hex: '#6E91B8' },
   { name: 'Vinho', hex: '#6E1F2A' },
   { name: 'Camelo', hex: '#A87543' },
   { name: 'Marrom', hex: '#4A2C1A' },

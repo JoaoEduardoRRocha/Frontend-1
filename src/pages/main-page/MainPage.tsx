@@ -117,7 +117,7 @@ export default function MainPage() {
           <h2 className="biz-box__title blink">★ Bem-vinda à nossa lojinha! ★</h2>
           <p>
             Oi, querida! Eu sou a <b>Dora</b> e essa aqui é a minha lojinha de roupas.
-            Tô há 8 anos atendendo as mulheres do bairro e agora também pela <b>internet</b>!
+            Tô há 30 anos atendendo as mulheres do bairro e agora também pela <b>internet</b>!
             Dá uma olhadinha nas peças, escolhe o que gostar e me chama no <b>Whatsapp</b>.
             Eu mesma respondo!
           </p>
@@ -278,22 +278,8 @@ export default function MainPage() {
         </div>
       </section>
 
-      {/* Sobre a Dora + recados */}
-      <section id="sobre" className="biz-section biz-section--cols">
-        <div className="biz-box biz-box--amarelo">
-          <h2 className="biz-h2 biz-h2--small">Quem é a Dora?</h2>
-          <hr className="biz-hr" />
-          <p>
-            Meu nome é <b>Dora Modas</b> e eu abri minha lojinha em 2018, depois de
-            muitos anos costurando em casa pra família e amigas. Hoje atendo no
-            balcão da loja, pelo Whatsapp e agora pela <i>internet</i> 😊.
-          </p>
-          <p style={{ marginTop: '0.8rem' }}>
-            Aqui você encontra peça por preço justo, com troca garantida em 7 dias e
-            <b> aquele atendimento de quem te conhece pelo nome</b>.
-          </p>
-        </div>
-
+      {/* Recados das clientes */}
+      <section id="sobre" className="biz-section">
         <div className="biz-box biz-box--azul">
           <h2 className="biz-h2 biz-h2--small">★ O que dizem ★</h2>
           <hr className="biz-hr" />

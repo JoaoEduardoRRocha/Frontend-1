@@ -35,7 +35,7 @@ export default function BizShell({
             </div>
           </Link>
           <p className="biz-header__slogan">
-            <i>~ Roupas femininas com carinho desde 2018 ~</i>
+            <i>~ Roupas femininas com carinho desde 1996 ~</i>
           </p>
           <p className="biz-header__addr">
             Rua Salgueiro do Campo, 505 · São Paulo/SP · CEP 05814-210 · Tel: (11) 91685-0647
