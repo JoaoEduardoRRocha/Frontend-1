@@ -1,9 +1,10 @@
 import './DebtorsPage.css'
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { isAuthenticated, isAdmin } from '../../api/requests'
 import ErrorAuthModal from '../../components/ErrorAuthModal/ErrorAuthModal'
 import Loading from '../../components/Loading/Loading'
+import BizShell from '../../components/BizShell/BizShell'
 
 interface Debtor {
   id: string
@@ -24,8 +25,7 @@ export default function DebtorsPage() {
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [userIsAuthenticated, setUserIsAuthenticated] = useState(false)
   const [userIsAdmin, setUserIsAdmin] = useState(false)
-  
-  // Form states
+
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
@@ -35,38 +35,26 @@ export default function DebtorsPage() {
     date: new Date().toISOString().split('T')[0]
   })
 
-  // Load debtors from localStorage and check auth
   useEffect(() => {
     const loadData = async () => {
       try {
         setIsLoading(true)
-        
-        // Verificar autenticação
         const isAuth = isAuthenticated()
         setUserIsAuthenticated(isAuth)
-        
         if (!isAuth) {
           setError('Você precisa estar logado para acessar esta página')
           setShowErrorModal(true)
           return
         }
-
-        // Verificar se é admin
         const adminStatus = await isAdmin()
         setUserIsAdmin(adminStatus)
-        
         if (!adminStatus) {
           setError('Apenas administradores podem acessar esta página')
           setShowErrorModal(true)
           return
         }
-
-        // Carregar devedores do localStorage
         const stored = localStorage.getItem(STORAGE_KEY)
-        if (stored) {
-          setDebtors(JSON.parse(stored))
-        }
-        
+        if (stored) setDebtors(JSON.parse(stored))
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar dados'
         setError(errorMessage)
@@ -75,41 +63,32 @@ export default function DebtorsPage() {
         setIsLoading(false)
       }
     }
-
     loadData()
   }, [])
 
-  // Save debtors to localStorage whenever it changes
   useEffect(() => {
-    if (userIsAdmin && debtors.length >= 0) {
+    if (userIsAdmin) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(debtors))
     }
   }, [debtors, userIsAdmin])
 
   const handleCloseErrorModal = () => {
     setShowErrorModal(false)
-    if (!userIsAuthenticated || !userIsAdmin) {
-      navigate('/')
-    }
+    if (!userIsAuthenticated || !userIsAdmin) navigate('/')
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
     if (!formData.name.trim() || !formData.amount.trim()) {
       setError('Por favor, preencha pelo menos o nome e o valor')
       setShowErrorModal(true)
       return
     }
-
     const amount = parseFloat(formData.amount)
     if (isNaN(amount) || amount <= 0) {
       setError('O valor deve ser um número maior que zero')
@@ -118,24 +97,16 @@ export default function DebtorsPage() {
     }
 
     if (editingId) {
-      // Editar devedor existente
-      setDebtors(prev => prev.map(debtor => 
-        debtor.id === editingId
-          ? {
-              ...debtor,
-              name: formData.name.trim(),
-              amount: amount,
-              description: formData.description.trim(),
-              date: formData.date
-            }
-          : debtor
+      setDebtors(prev => prev.map(d =>
+        d.id === editingId
+          ? { ...d, name: formData.name.trim(), amount, description: formData.description.trim(), date: formData.date }
+          : d
       ))
     } else {
-      // Adicionar novo devedor
       const newDebtor: Debtor = {
         id: Date.now().toString(),
         name: formData.name.trim(),
-        amount: amount,
+        amount,
         description: formData.description.trim(),
         date: formData.date,
         createdAt: new Date().toISOString()
@@ -143,122 +114,109 @@ export default function DebtorsPage() {
       setDebtors(prev => [...prev, newDebtor])
     }
 
-    // Reset form
-    setFormData({
-      name: '',
-      amount: '',
-      description: '',
-      date: new Date().toISOString().split('T')[0]
-    })
+    setFormData({ name: '', amount: '', description: '', date: new Date().toISOString().split('T')[0] })
     setShowForm(false)
     setEditingId(null)
   }
 
-  const handleEdit = (debtor: Debtor) => {
-    setFormData({
-      name: debtor.name,
-      amount: debtor.amount.toString(),
-      description: debtor.description,
-      date: debtor.date
-    })
-    setEditingId(debtor.id)
+  const handleEdit = (d: Debtor) => {
+    setFormData({ name: d.name, amount: d.amount.toString(), description: d.description, date: d.date })
+    setEditingId(d.id)
     setShowForm(true)
   }
 
   const handleDelete = (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este registro?')) {
-      setDebtors(prev => prev.filter(debtor => debtor.id !== id))
+      setDebtors(prev => prev.filter(d => d.id !== id))
     }
   }
 
   const handleCancel = () => {
-    setFormData({
-      name: '',
-      amount: '',
-      description: '',
-      date: new Date().toISOString().split('T')[0]
-    })
+    setFormData({ name: '', amount: '', description: '', date: new Date().toISOString().split('T')[0] })
     setShowForm(false)
     setEditingId(null)
   }
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value)
-  }
+  const formatCurrency = (v: number) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
+  const formatDate = (s: string) => new Date(s).toLocaleDateString('pt-BR')
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('pt-BR')
-  }
-
-  const totalDebt = debtors.reduce((sum, debtor) => sum + debtor.amount, 0)
+  const totalDebt = debtors.reduce((sum, d) => sum + d.amount, 0)
 
   if (isLoading) {
     return (
-      <div className="debtors-page">
-        <Loading isVisible={true} />
-      </div>
+      <BizShell isAdmin={userIsAdmin}>
+        <section className="biz-section" style={{ textAlign: 'center' }}>
+          <Loading isVisible={true} />
+        </section>
+      </BizShell>
     )
   }
 
   if (!userIsAuthenticated || !userIsAdmin) {
     return (
-      <div className="debtors-page">
+      <BizShell isAdmin={false}>
+        <section className="biz-section">
+          <div className="biz-box biz-box--rosa biz-box--narrow" style={{ textAlign: 'center' }}>
+            <h2 className="biz-h2 biz-h2--small">Acesso negado</h2>
+            <hr className="biz-hr" />
+            <p>{error || 'Apenas administradores podem ver os devedores.'}</p>
+          </div>
+        </section>
         <ErrorAuthModal
           isOpen={showErrorModal}
           onClose={handleCloseErrorModal}
           message={error || 'Acesso negado'}
         />
-      </div>
+      </BizShell>
     )
   }
 
   return (
-    <div className="debtors-page">
-      <div className="container">
-        <div className="page-header-section">
-          <Link to="/" className="back-to-main-link">
-            ← Voltar para Página Principal
-          </Link>
-          <h1>📝 Controle de Devedores</h1>
-          <p>Gerencie as pessoas que estão devendo</p>
+    <BizShell isAdmin>
+      <section className="biz-section">
+        <h2 className="biz-h2">📝 Caderninho de devedores</h2>
+        <hr className="biz-hr" />
+        <p className="biz-lead">
+          Anote quem comprou fiado e quanto está devendo. Tudo guardado aqui no navegador.
+        </p>
+
+        <div className="biz-summary">
+          <div className="biz-summary__card">
+            <span className="biz-summary__label">Total de devedores</span>
+            <span className="biz-summary__value">{debtors.length}</span>
+          </div>
+          <div className="biz-summary__card">
+            <span className="biz-summary__label">Valor total</span>
+            <span className="biz-summary__value biz-summary__value--dinheiro">
+              {formatCurrency(totalDebt)}
+            </span>
+          </div>
         </div>
 
-        <div className="debtors-summary">
-          <div className="summary-card">
-            <span className="summary-label">Total de Devedores:</span>
-            <span className="summary-value">{debtors.length}</span>
-          </div>
-          <div className="summary-card">
-            <span className="summary-label">Valor Total:</span>
-            <span className="summary-value total-amount">{formatCurrency(totalDebt)}</span>
-          </div>
-        </div>
-
-        <div className="debtors-actions">
-          {!showForm && (
-            <button 
-              className="btn-add-debtor"
+        {!showForm && (
+          <p style={{ textAlign: 'center', margin: '1rem 0' }}>
+            <button
+              type="button"
+              className="biz-btn biz-btn--rosa"
               onClick={() => setShowForm(true)}
             >
-              ➕ Adicionar Novo Devedor
+              ➕ Adicionar novo devedor
             </button>
-          )}
-        </div>
+          </p>
+        )}
 
         {showForm && (
-          <div className="form-container">
-            <h2>{editingId ? '✏️ Editar Devedor' : '➕ Novo Devedor'}</h2>
-            <form className="debtor-form" onSubmit={handleSubmit}>
-              <div className="form-group">
+          <div className="biz-box biz-box--rosa">
+            <h3 className="biz-h3">{editingId ? '✏️ Editar devedor' : '➕ Novo devedor'}</h3>
+            <form className="biz-form" onSubmit={handleSubmit}>
+              <div className="biz-form__group">
                 <label htmlFor="name">Nome *</label>
                 <input
                   type="text"
                   id="name"
                   name="name"
+                  className="biz-input"
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Nome da pessoa"
@@ -266,13 +224,14 @@ export default function DebtorsPage() {
                 />
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
+              <div className="biz-form__row">
+                <div className="biz-form__group">
                   <label htmlFor="amount">Valor (R$) *</label>
                   <input
                     type="number"
                     id="amount"
                     name="amount"
+                    className="biz-input"
                     value={formData.amount}
                     onChange={handleInputChange}
                     placeholder="0.00"
@@ -282,12 +241,13 @@ export default function DebtorsPage() {
                   />
                 </div>
 
-                <div className="form-group">
+                <div className="biz-form__group">
                   <label htmlFor="date">Data</label>
                   <input
                     type="date"
                     id="date"
                     name="date"
+                    className="biz-input"
                     value={formData.date}
                     onChange={handleInputChange}
                     required
@@ -295,92 +255,90 @@ export default function DebtorsPage() {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="description">Descrição / Observações</label>
+              <div className="biz-form__group">
+                <label htmlFor="description">Observações</label>
                 <textarea
                   id="description"
                   name="description"
+                  className="biz-textarea"
                   value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="Observações sobre a dívida..."
+                  placeholder="O que comprou, combinação de pagamento..."
                   rows={3}
                 />
               </div>
 
-              <div className="form-actions">
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={handleCancel}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                >
-                  {editingId ? 'Salvar Alterações' : 'Adicionar'}
+              <div className="biz-form__actions">
+                <button type="button" className="biz-btn" onClick={handleCancel}>Cancelar</button>
+                <button type="submit" className="biz-btn biz-btn--rosa">
+                  {editingId ? 'Salvar alterações' : 'Adicionar'}
                 </button>
               </div>
             </form>
           </div>
         )}
+      </section>
 
-        <div className="debtors-list">
-          {debtors.length === 0 ? (
-            <div className="empty-state">
-              <p>📋 Nenhum devedor cadastrado ainda.</p>
-              <p>Clique em "Adicionar Novo Devedor" para começar.</p>
-            </div>
-          ) : (
-            <div className="debtors-grid">
-              {debtors.map(debtor => (
-                <div key={debtor.id} className="debtor-card">
-                  <div className="debtor-header">
-                    <h3>{debtor.name}</h3>
-                    <div className="debtor-amount">{formatCurrency(debtor.amount)}</div>
-                  </div>
-                  
-                  {debtor.description && (
-                    <div className="debtor-description">
-                      <p>{debtor.description}</p>
-                    </div>
-                  )}
-                  
-                  <div className="debtor-footer">
-                    <div className="debtor-date">
-                      <span>📅 {formatDate(debtor.date)}</span>
-                    </div>
-                    <div className="debtor-actions">
-                      <button
-                        className="btn-edit"
-                        onClick={() => handleEdit(debtor)}
-                        title="Editar"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        className="btn-delete"
-                        onClick={() => handleDelete(debtor.id)}
-                        title="Excluir"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
-                </div>
+      <section className="biz-section">
+        <h2 className="biz-h2 biz-h2--small">Lista de devedores</h2>
+        <hr className="biz-hr" />
+
+        {debtors.length === 0 ? (
+          <div className="biz-empty">
+            <p>📋 <b>Nenhum devedor cadastrado ainda.</b></p>
+            <p>Clique em "Adicionar novo devedor" pra começar.</p>
+          </div>
+        ) : (
+          <table className="biz-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Valor</th>
+                <th>Data</th>
+                <th>Observações</th>
+                <th style={{ width: '8rem' }}>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {debtors.map(d => (
+                <tr key={d.id}>
+                  <td><b>{d.name}</b></td>
+                  <td style={{ color: 'var(--rosa-forte)', fontWeight: 'bold' }}>
+                    {formatCurrency(d.amount)}
+                  </td>
+                  <td>📅 {formatDate(d.date)}</td>
+                  <td>{d.description || <i>—</i>}</td>
+                  <td>
+                    <button
+                      type="button"
+                      className="biz-btn biz-btn--small"
+                      onClick={() => handleEdit(d)}
+                      title="Editar"
+                      style={{ marginBottom: '0.3rem' }}
+                    >
+                      ✏️ Editar
+                    </button>
+                    <button
+                      type="button"
+                      className="biz-btn biz-btn--small biz-btn--perigo"
+                      onClick={() => handleDelete(d.id)}
+                      title="Excluir"
+                    >
+                      🗑️ Excluir
+                    </button>
+                  </td>
+                </tr>
               ))}
-            </div>
-          )}
-        </div>
-      </div>
+            </tbody>
+          </table>
+        )}
+      </section>
 
       <ErrorAuthModal
         isOpen={showErrorModal}
         onClose={handleCloseErrorModal}
         message={error}
       />
-    </div>
+    </BizShell>
   )
 }
-

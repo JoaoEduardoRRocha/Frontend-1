@@ -3,13 +3,20 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { getItem, isAuthenticated, isAdmin, deleteItem, updateItem } from '../../api/requests'
 import { Item, UpdateItemRequest } from '../../types/api'
-import Header from '../../components/Header/Header'
-import LogoutButton from '../../components/LogoutButton/LogoutButton'
 import Loading from '../../components/Loading/Loading'
 import ErrorAuthModal from '../../components/ErrorAuthModal/ErrorAuthModal'
 import DeleteConfirmationModal from '../../components/DeleteConfirmationModal/DeleteConfirmationModal'
 import EditItemModal from '../../components/EditItemModal/EditItemModal'
 import { ImageModal } from '../../components/ImageModal'
+import BizShell from '../../components/BizShell/BizShell'
+import { filterColors } from '../../data/mockData'
+
+const WHATSAPP_NUMBER = '5511916850647'
+
+const colorHex = (name: string) => {
+  const found = filterColors.find((c) => c.name.toLowerCase() === name.toLowerCase())
+  return found?.hex ?? '#cfc3b1'
+}
 
 export default function ItemDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -18,7 +25,6 @@ export default function ItemDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [showErrorModal, setShowErrorModal] = useState(false)
-  const [userIsAuthenticated, setUserIsAuthenticated] = useState(false)
   const [userIsAdmin, setUserIsAdmin] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -26,15 +32,8 @@ export default function ItemDetailPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showImageModal, setShowImageModal] = useState(false)
   const [editFormData, setEditFormData] = useState<UpdateItemRequest>({
-    name: '',
-    price: 0,
-    quantity: 0,
-    size: '',
-    color: '',
-    description: '',
-    category: '',
-    brand: '',
-    imageUrl: ''
+    name: '', price: 0, quantity: 0, size: '', color: '',
+    description: '', category: '', brand: '', imageUrl: ''
   })
 
   useEffect(() => {
@@ -45,7 +44,6 @@ export default function ItemDetailPage() {
         setIsLoading(false)
         return
       }
-
       try {
         setIsLoading(true)
         const itemData = await getItem(parseInt(id))
@@ -59,17 +57,11 @@ export default function ItemDetailPage() {
       }
     }
 
-    // Check authentication and admin status
     const checkAuthStatus = async () => {
-      const isAuth = isAuthenticated()
-      setUserIsAuthenticated(isAuth)
-      
-      if (isAuth) {
+      if (isAuthenticated()) {
         try {
-          const adminStatus = await isAdmin()
-          setUserIsAdmin(adminStatus)
-        } catch (error) {
-          console.error('Error checking admin status:', error)
+          setUserIsAdmin(await isAdmin())
+        } catch {
           setUserIsAdmin(false)
         }
       } else {
@@ -81,29 +73,12 @@ export default function ItemDetailPage() {
     checkAuthStatus()
   }, [id])
 
-  const handleCloseErrorModal = () => {
-    setShowErrorModal(false)
-    setError('')
-  }
-
-  const handleLogout = () => {
-    setUserIsAuthenticated(false)
-    setUserIsAdmin(false)
-  }
-
-  const handleDeleteClick = () => {
-    setShowDeleteConfirm(true)
-  }
-
   const handleDeleteConfirm = async () => {
     if (!item) return
-    
     setIsDeleting(true)
     setShowDeleteConfirm(false)
-    
     try {
       await deleteItem(item.id)
-      // Sucesso - redirecionar para MainPage
       navigate('/', { replace: true })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao deletar item'
@@ -112,10 +87,6 @@ export default function ItemDetailPage() {
     } finally {
       setIsDeleting(false)
     }
-  }
-
-  const handleDeleteCancel = () => {
-    setShowDeleteConfirm(false)
   }
 
   const handleEditClick = () => {
@@ -135,10 +106,6 @@ export default function ItemDetailPage() {
     }
   }
 
-  const handleEditCancel = () => {
-    setShowEditModal(false)
-  }
-
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
     setEditFormData(prev => ({
@@ -147,42 +114,16 @@ export default function ItemDetailPage() {
     }))
   }
 
-  const handleEditImageUpload = (imageUrl: string) => {
-    setEditFormData(prev => ({
-      ...prev,
-      imageUrl
-    }))
-  }
-
-  const handleImageClick = () => {
-    if (item?.imageUrl) {
-      setShowImageModal(true)
-    }
-  }
-
-  const handleImageModalClose = () => {
-    setShowImageModal(false)
-  }
-
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!item) return
-    
     setIsEditing(true)
-    
     try {
-      // Validação básica
       if (!editFormData.name || !editFormData.description || !editFormData.category || !editFormData.brand || !editFormData.size || !editFormData.color) {
         throw new Error('Por favor, preencha todos os campos obrigatórios')
       }
-
-      if (editFormData.price <= 0) {
-        throw new Error('O preço deve ser maior que zero')
-      }
-
-      if (editFormData.quantity < 0) {
-        throw new Error('A quantidade não pode ser negativa')
-      }
+      if (editFormData.price <= 0) throw new Error('O preço deve ser maior que zero')
+      if (editFormData.quantity < 0) throw new Error('A quantidade não pode ser negativa')
 
       const updatedItem = await updateItem(item.id, editFormData)
       setItem(updatedItem)
@@ -196,178 +137,165 @@ export default function ItemDetailPage() {
     }
   }
 
+  const handleWhatsApp = () => {
+    if (!item) return
+    const itemUrl = `${window.location.origin}/item/${item.id}`
+    const message = encodeURIComponent(`Olá Dora! Tenho interesse na peça "${item.name}". ${itemUrl}`)
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, '_blank')
+  }
+
   if (isLoading) {
     return (
-      <div className="item-detail-page">
-        <Header 
-          authButton={
-            <LogoutButton 
-              isAuthenticated={userIsAuthenticated}
-              onLogout={handleLogout}
-            />
-          }
-          isAdmin={userIsAdmin}
-        />
-        <div className="loading-container">
+      <BizShell isAdmin={userIsAdmin}>
+        <section className="biz-section" style={{ textAlign: 'center' }}>
           <Loading isVisible={true} />
-          <p>Carregando detalhes do item...</p>
-        </div>
-      </div>
+          <p>Carregando detalhes...</p>
+        </section>
+      </BizShell>
     )
   }
 
   if (!item) {
     return (
-      <div className="item-detail-page">
-        <Header 
-          authButton={
-            <LogoutButton 
-              isAuthenticated={userIsAuthenticated}
-              onLogout={handleLogout}
-            />
-          }
-          isAdmin={userIsAdmin}
-        />
-        <div className="error-container">
-          <h2>Item não encontrado</h2>
-          <Link to="/" className="back-link">← Voltar para a página principal</Link>
-        </div>
-        <ErrorAuthModal 
+      <BizShell isAdmin={userIsAdmin}>
+        <section className="biz-section">
+          <div className="biz-box biz-box--rosa biz-box--narrow" style={{ textAlign: 'center' }}>
+            <h2 className="biz-h2 biz-h2--small">Peça não encontrada</h2>
+            <hr className="biz-hr" />
+            <p>Essa peça não existe mais ou foi removida da loja.</p>
+            <p style={{ marginTop: '1rem' }}>
+              <Link to="/" className="biz-btn">← Voltar pra loja</Link>
+            </p>
+          </div>
+        </section>
+        <ErrorAuthModal
           isOpen={showErrorModal}
-          onClose={handleCloseErrorModal}
-          message={error || "Erro ao carregar item"}
+          onClose={() => { setShowErrorModal(false); setError('') }}
+          message={error || 'Erro ao carregar item'}
         />
-      </div>
+      </BizShell>
     )
   }
 
   return (
-    <div className="item-detail-page">
-      <Header 
-        authButton={
-          <LogoutButton 
-            isAuthenticated={userIsAuthenticated}
-            onLogout={handleLogout}
-          />
-        }
-      />
-      
-      <main className="item-detail-content">
-        <div className="detail-container">
-          <div className="detail-header">
-            <Link to="/" className="back-link">← Voltar para a página principal</Link>
-            {userIsAdmin && <span className="admin-badge">Administrador</span>}
+    <BizShell isAdmin={userIsAdmin}>
+      <section className="biz-section">
+        <h2 className="biz-h2">✿ {item.name} ✿</h2>
+        <hr className="biz-hr" />
+
+        <div className="biz-detail">
+          <div className="biz-detail__img">
+            {item.imageUrl ? (
+              <img
+                src={item.imageUrl}
+                alt={item.name}
+                onClick={() => setShowImageModal(true)}
+                title="Clique para ampliar"
+              />
+            ) : (
+              <div style={{ height: '32rem', background: 'var(--cinza-claro)' }} />
+            )}
           </div>
 
-          <div className="item-detail-card">
-            {item.imageUrl && (
-              <div className="detail-image-section">
-                <img 
-                  src={item.imageUrl} 
-                  alt={item.name} 
-                  className="detail-item-image clickable"
-                  onClick={handleImageClick}
-                  title="Clique para ampliar"
-                />
-              </div>
-            )}
-            
-            <div className="detail-main-info">
-              <div className="detail-title-section">
-                {userIsAdmin && <span className="detail-item-id">ID: {item.id}</span>}
-                <h1 className="detail-item-name">{item.name}</h1>
-                <div className="detail-price">R$ {parseFloat(item.price).toFixed(2)}</div>
-              </div>
-
-              <div className="detail-info-grid">
-                <div className="detail-info-item">
-                  <span className="detail-label">Categoria:</span>
-                  <span className="detail-value">{item.category}</span>
-                </div>
-                <div className="detail-info-item">
-                  <span className="detail-label">Marca:</span>
-                  <span className="detail-value">{item.brand}</span>
-                </div>
-                <div className="detail-info-item">
-                  <span className="detail-label">Tamanho:</span>
-                  <span className="detail-value">{item.size}</span>
-                </div>
-                <div className="detail-info-item">
-                  <span className="detail-label">Cor:</span>
-                  <span className="detail-value color-display">
-                    <span 
-                      className="detail-color-dot" 
-                      style={{ backgroundColor: item.color }}
-                    ></span>
-                    {item.color}
-                  </span>
-                </div>
-                <div className="detail-info-item">
-                  <span className="detail-label">Estoque:</span>
-                  <span className="detail-value quantity-value">{item.quantity} unidades</span>
-                </div>
-                {userIsAdmin && (
-                  <div className="detail-info-item">
-                    <span className="detail-label">Data de Criação:</span>
-                    <span className="detail-value">
-                      {new Date(item.createdAt).toLocaleDateString('pt-BR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="detail-description-section">
-              <h3 className="description-title">Descrição Completa</h3>
-              <p className="detail-description">{item.description}</p>
-            </div>
-
+          <div>
             {userIsAdmin && (
-              <div className="detail-actions">
-                <button 
-                  className="detail-edit-button"
-                  onClick={handleEditClick}
-                  disabled={isDeleting || isEditing}
-                >
-                  ✏️ Editar Item
-                </button>
-                <Link 
-                  to="/upload-image"
-                  className="detail-upload-button"
-                >
-                  📷 Upload Image
-                </Link>
-                <button 
-                  className="detail-delete-button"
-                  onClick={handleDeleteClick}
-                  disabled={isDeleting || isEditing}
-                >
-                  {isDeleting ? 'Deletando...' : '🗑️ Deletar Item'}
-                </button>
-              </div>
+              <p className="biz-detail__id">ID: {item.id}</p>
             )}
+            <p className="biz-detail__price">
+              R$ {parseFloat(item.price).toFixed(2)}
+            </p>
+
+            <table className="biz-info-table">
+              <tbody>
+                <tr><th>Categoria:</th><td>{item.category}</td></tr>
+                <tr><th>Marca:</th><td>{item.brand}</td></tr>
+                <tr><th>Tamanho:</th><td><b>{item.size}</b></td></tr>
+                <tr>
+                  <th>Cor:</th>
+                  <td>
+                    <span className="biz-card__cor">
+                      <span
+                        className="biz-color-dot"
+                        style={{ background: colorHex(item.color) }}
+                      />
+                      {item.color}
+                    </span>
+                  </td>
+                </tr>
+                <tr><th>Estoque:</th><td>{item.quantity} unidades</td></tr>
+                {userIsAdmin && (
+                  <tr>
+                    <th>Cadastro:</th>
+                    <td>
+                      {new Date(item.createdAt).toLocaleDateString('pt-BR', {
+                        year: 'numeric', month: 'long', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                      })}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+
+            <p style={{ marginTop: '1rem' }}>
+              <button
+                type="button"
+                className="biz-btn biz-btn--zap biz-btn--block"
+                onClick={handleWhatsApp}
+              >
+                💬 Quero essa peça! Chamar a Dora
+              </button>
+            </p>
           </div>
         </div>
-      </main>
+      </section>
 
-      <ErrorAuthModal 
+      <section className="biz-section">
+        <h2 className="biz-h2 biz-h2--small">Descrição completa</h2>
+        <hr className="biz-hr" />
+        <div className="biz-box biz-box--azul">
+          <p>{item.description}</p>
+        </div>
+      </section>
+
+      {userIsAdmin && (
+        <section className="biz-section">
+          <h2 className="biz-h2 biz-h2--small">★ Painel da Dora (admin) ★</h2>
+          <hr className="biz-hr" />
+          <div className="biz-form__actions" style={{ justifyContent: 'center' }}>
+            <button
+              type="button"
+              className="biz-btn biz-btn--rosa"
+              onClick={handleEditClick}
+              disabled={isDeleting || isEditing}
+            >
+              ✏️ Editar peça
+            </button>
+            <Link to="/upload-image" className="biz-btn">📷 Trocar foto</Link>
+            <button
+              type="button"
+              className="biz-btn biz-btn--perigo"
+              onClick={() => setShowDeleteConfirm(true)}
+              disabled={isDeleting || isEditing}
+            >
+              {isDeleting ? 'Deletando...' : '🗑️ Deletar peça'}
+            </button>
+          </div>
+        </section>
+      )}
+
+      <ErrorAuthModal
         isOpen={showErrorModal}
-        onClose={handleCloseErrorModal}
-        message={error || "Erro ao carregar dados"}
+        onClose={() => { setShowErrorModal(false); setError('') }}
+        message={error || 'Erro ao carregar dados'}
       />
 
       <DeleteConfirmationModal
         isOpen={showDeleteConfirm}
-        itemName={item?.name || ''}
+        itemName={item.name}
         isDeleting={isDeleting}
         onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
+        onCancel={() => setShowDeleteConfirm(false)}
       />
 
       <EditItemModal
@@ -376,17 +304,17 @@ export default function ItemDetailPage() {
         formData={editFormData}
         onSubmit={handleEditSubmit}
         onChange={handleEditChange}
-        onCancel={handleEditCancel}
-        onImageUpload={handleEditImageUpload}
-        itemId={item?.id}
+        onCancel={() => setShowEditModal(false)}
+        onImageUpload={(imageUrl) => setEditFormData(prev => ({ ...prev, imageUrl }))}
+        itemId={item.id}
       />
 
       <ImageModal
         isOpen={showImageModal}
-        imageUrl={item?.imageUrl || ''}
-        imageAlt={item?.name || ''}
-        onClose={handleImageModalClose}
+        imageUrl={item.imageUrl || ''}
+        imageAlt={item.name}
+        onClose={() => setShowImageModal(false)}
       />
-    </div>
+    </BizShell>
   )
 }

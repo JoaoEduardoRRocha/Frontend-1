@@ -11,6 +11,7 @@ import {
   sortOptions,
 } from '../../data/mockData'
 import { Item } from '../../types/api'
+import BizShell from '../../components/BizShell/BizShell'
 
 const WHATSAPP_NUMBER = '5511916850647'
 
@@ -109,38 +110,7 @@ export default function MainPage() {
   }
 
   return (
-    <div className="biz">
-      {/* Cabeçalho */}
-      <header className="biz-header">
-        <div className="biz-header__top">
-          <div className="biz-header__brand">
-            <span className="biz-header__star">✿</span>
-            <h1 className="biz-header__name">Dora Modas</h1>
-            <span className="biz-header__star">✿</span>
-          </div>
-          <p className="biz-header__slogan">
-            <i>~ Roupas femininas com carinho desde 2018 ~</i>
-          </p>
-          <p className="biz-header__addr">
-            Rua Salgueiro do Campo, 505 · São Paulo/SP · CEP 05814-210 · Tel: (11) 91685-0647
-          </p>
-        </div>
-
-        <nav className="biz-nav">
-          <a href="#promocoes">Promoções</a>
-          <span>|</span>
-          <a href="#produtos">Nossa loja</a>
-          <span>|</span>
-          <a href="#sobre">Sobre a Dora</a>
-          <span>|</span>
-          <a href="#contato">Como chegar</a>
-          <span>|</span>
-          <a href="#" onClick={(e) => { e.preventDefault(); navigate('/login') }}>
-            Entrar
-          </a>
-        </nav>
-      </header>
-
+    <BizShell showStoreNav>
       {/* Boas-vindas */}
       <section className="biz-bemvinda">
         <div className="biz-box biz-box--rosa">
@@ -388,22 +358,13 @@ export default function MainPage() {
         </table>
       </section>
 
-      {/* Rodapé */}
-      <footer className="biz-footer">
-        <p>
-          © 2026 — <b>Dora Modas</b> — Todos os direitos reservados.
-        </p>
+      {/* Contador de visitas (estilo home antiga) */}
+      <section className="biz-section" style={{ textAlign: 'center', padding: '1rem' }}>
         <p className="biz-footer__line">
           Última atualização: <b>03/05/2026</b> · Você é a visita nº{' '}
           <span className="biz-counter">{String(visitas).padStart(6, '0')}</span>
         </p>
-        <p className="biz-footer__small">
-          <i>Site feito com carinho 💖 — melhor visualizado em 1024x768</i>
-        </p>
-        <p className="biz-footer__small">
-          <a href="#">Topo da página ↑</a>
-        </p>
-      </footer>
-    </div>
+      </section>
+    </BizShell>
   )
 }
